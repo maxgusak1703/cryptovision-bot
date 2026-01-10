@@ -25,6 +25,7 @@
 * **AI Engine:** Google Generative AI.
 * **Database:** PostgreSQL (через Docker) + SQLAlchemy.
 * **Security:** Cryptography (Fernet encryption).
+* **Infrastructure:** Docker & Docker Compose.
 
 ---
 
@@ -36,34 +37,37 @@ git clone https://github.com/maxgusak1703/cryptovision-bot.git
 cd cryptovision-bot
 ```
 
-### 2. Запуск бази даних (Docker)
-Проєкт використовує Docker для швидкого розгортання PostgreSQL:
-```bash
-docker-compose up -d
-```
-
-### 3. Налаштування середовища
-```bash
-python3 -m venv venv
-source venv/bin/activate  # Для Linux/macOS
-# або
-venv\Scripts\activate     # Для Windows
-
-pip install -r requirements.txt
-```
-
-### 4. Налаштування змінних оточення (.env)
-Створіть файл `.env` у корені проєкту та заповніть його:
+### 2. Налаштування змінних оточення (.env)
+Створіть файл .env у корені проєкту та заповніть його своїми даними:
 ```ini
 BOT_TOKEN=ваш_токен_від_botfather
+# Ключ для шифрування ключів у БД (має бути base64-encoded 32-byte key)
 ENCRYPTION_KEY=ваш_ключ_шифрування_fernet
 GEMINI_API_KEY=ваш_ключ_google_ai_studio
-DATABASE_URL=postgresql://postgres:password@localhost:5432/cryptovision
+DATABASE_URL=postgresql://postgres:password@db:5432/cryptovision
 ```
 
-### 5. Запуск бота
+### 3. Запуск через Docker
+Цей спосіб автоматично підніме базу даних PostgreSQL та бота в ізольованих контейнерах.
 ```bash
-python3 -m bot.main
+docker-compose up -d --build
+```
+
+### 4. Локальний запуск (Альтернатива)
+Якщо ви хочете запустити бота без Docker (потрібно мати встановлений PostgreSQL локально):
+```bash
+# Створення віртуального середовища
+python3 -m venv venv
+
+# Активація
+source venv/bin/activate  # Linux/macOS
+# venv\Scripts\activate   # Windows
+
+# Встановлення залежностей
+pip install -r requirements.txt
+
+# Запуск бота
+python -m bot.main
 ```
 
 ---
