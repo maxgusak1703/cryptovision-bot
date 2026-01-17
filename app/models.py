@@ -1,13 +1,12 @@
 from sqlalchemy import Column, Integer, String, ForeignKey, Boolean
 from sqlalchemy.orm import declarative_base, relationship
-
-Base = declarative_base()
+from app.database import Base
 
 class User(Base):
     __tablename__ = "users"
     id = Column(Integer, primary_key=True)
     username = Column(String, unique=True)
-    
+
     exchanges = relationship("ExchangeAccount", back_populates="owner")
 
 class ExchangeAccount(Base):
