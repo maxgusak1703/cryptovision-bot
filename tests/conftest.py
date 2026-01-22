@@ -1,21 +1,33 @@
 import pytest
-from sqlalchemy import create_engine
+import pytest_asyncio
+from sqlalchemy.ext.asyncio import create_async_engine, AsyncSession
 from sqlalchemy.orm import sessionmaker
-from app.database import Base 
-from app.models import User, ExchangeAccount 
+from sqlalchemy.pool import StaticPool
 
-TEST_DATABASE_URL = "sqlite:///:memory:"
+from app.database import Base
 
-@pytest.fixture(scope="function")
-def db_session():
-    engine = create_engine(TEST_DATABASE_URL, connect_args={"check_same_thread": False})
-    Base.metadata.create_all(bind=engine)
+
+TEST_DATABASE_URL = "sqlite+aiosqlite:///:memory:"
+
+@pytest_asyncio.fixture(scope="function")
+async def db_session():
+    engine = create_async_engine(
+        TEST_DATABASE_URL, 
+        connect_args={"check_same_thread": False}, 
+        poolclass=StaticPool 
+    )
     
-    TestingSessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
-    session = TestingSessionLocal()
+    async with engine.begin() as conn:
+        await conn.run_sync(Base.metadata.create_all)
     
-    try:
-        yield session 
-    finally:
-        session.close()
-        Base.metadata.drop_all(bind=engine)
+    async_session = sessionmaker(
+        engine, class_=AsyncSession, expire_on_commit=False
+    )
+    
+    async with async_session() as session:
+        yield session
+    
+    async with engine.begin() as conn:
+        await conn.run_sync(Base.metadata.drop_all)
+    
+    await engine.dispose()
