@@ -21,7 +21,7 @@ services:
     env_file:
       - .env
     environment:
-      DATABASE_URL: postgresql://postgres:password@db:5432/cryptovision
+      DATABASE_URL: postgresql+asyncpg://postgres:password@db:5432/cryptovision
 
 volumes:
   postgres_data:
